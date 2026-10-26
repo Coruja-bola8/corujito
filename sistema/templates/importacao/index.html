@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block titulo %}Importar CSV{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>Importação de dados via CSV</h1></div>
+
+<p style="color:var(--texto-suave); max-width:680px;">
+  Use esta seção para carregar dados em massa a partir dos arquivos CSV exportados da planilha Excel.
+  O sistema aceita separadores <strong>;</strong> ou <strong>,</strong> e ignora linhas completamente vazias.
+  Registros já existentes não são duplicados — o sistema verifica antes de importar.
+</p>
+
+<div class="grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); margin-top:20px;">
+
+  <div class="card">
+    <strong>Pessoal</strong>
+    <p class="texto-suave" style="font-size:13px;">Arquivo: <code>3db_pessoal.csv</code><br>Importa militares com posto, arma, situação e datas.</p>
+    <a class="btn btn-sm" href="{{ url_for('importacao.pessoal') }}">Importar Pessoal</a>
+  </div>
+
+  <div class="card">
+    <strong>Cargos (QCP)</strong>
+    <p class="texto-suave" style="font-size:13px;">Arquivo: <code>2QCP.csv</code><br>Importa vagas previstas e vincula ao ocupante cadastrado.</p>
+    <a class="btn btn-sm" href="{{ url_for('importacao.cargos') }}">Importar Cargos</a>
+  </div>
+
+  <div class="card">
+    <strong>Verba Operacional</strong>
+    <p class="texto-suave" style="font-size:13px;">Arquivo: <code>9db_verba2.csv</code><br>Importa recebimentos com valor, data e operação.</p>
+    <a class="btn btn-sm" href="{{ url_for('importacao.verba_operacional') }}">Importar Verba Op.</a>
+  </div>
+
+  <div class="card">
+    <strong>Verba Administrativa (NC)</strong>
+    <p class="texto-suave" style="font-size:13px;">Arquivo: <code>4verba_adm.csv</code><br>Importa NCs — você seleciona a fonte (CIE ou FUNADOM).</p>
+    <a class="btn btn-sm" href="{{ url_for('importacao.verba_adm') }}">Importar Verba Adm.</a>
+  </div>
+
+  <div class="card">
+    <strong>Turmas de Estágio</strong>
+    <p class="texto-suave" style="font-size:13px;">Arquivo: <code>5estagios_externos.csv</code><br>Importa turmas com datas e prazos de indicação.</p>
+    <a class="btn btn-sm" href="{{ url_for('importacao.estagios') }}">Importar Estágios</a>
+  </div>
+
+  <div class="card">
+    <strong>Participantes (EEIOC)</strong>
+    <p class="texto-suave" style="font-size:13px;">Arquivo: <code>6eeioc.csv</code><br>Importa voluntários por turma. Cria turma automaticamente se não existir.</p>
+    <a class="btn btn-sm" href="{{ url_for('importacao.participantes') }}">Importar Participantes</a>
+  </div>
+
+  <div class="card">
+    <strong>Parceiros</strong>
+    <p class="texto-suave" style="font-size:13px;">Arquivo: <code>7listas.csv</code><br>Importa empresas parceiras vinculadas às unidades PM/DP.</p>
+    <a class="btn btn-sm" href="{{ url_for('importacao.parceiros') }}">Importar Parceiros</a>
+  </div>
+
+</div>
+
+<div class="card" style="margin-top:24px; max-width:680px; background:var(--areia-escura); border-color:var(--borda);">
+  <strong>Dicas para importar corretamente</strong>
+  <ul style="font-size:13px; color:var(--texto-suave); margin:8px 0 0; padding-left:20px; line-height:1.8;">
+    <li>Exporte cada aba da planilha como CSV separado antes de importar</li>
+    <li>Importe <strong>Pessoal primeiro</strong> — os outros módulos podem depender dos militares cadastrados</li>
+    <li>O sistema ignora linhas vazias e tenta detectar o separador automaticamente</li>
+    <li>Após importar, confira o resumo de erros e corrija pontualmente pelo cadastro manual</li>
+    <li>Você pode importar o mesmo arquivo mais de uma vez com segurança — duplicatas são ignoradas</li>
+  </ul>
+</div>
+{% endblock %}

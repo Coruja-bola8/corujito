@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if cargo else 'Novo' }} Cargo{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>{{ 'Editar cargo' if cargo else 'Novo cargo' }}</h1></div>
+
+<form method="POST" class="form-grid">
+  <div class="full">
+    <label>Nome do cargo</label>
+    <input type="text" name="cargo" required value="{{ cargo.cargo if cargo else '' }}">
+  </div>
+  <div>
+    <label>Categoria prevista</label>
+    <select name="categoria_posto_previsto" required>
+      {% for cat in categorias %}
+      <option value="{{ cat }}" {{ 'selected' if cargo and cargo.categoria_posto_previsto == cat else '' }}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Ocupante atual</label>
+    <select name="ocupante_id">
+      <option value="">-- vago / claro --</option>
+      {% for m in militares %}
+      <option value="{{ m.id }}" {{ 'selected' if cargo and cargo.ocupante_id == m.id else '' }}>{{ m.nome }} ({{ m.posto_grad }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Vagas no QC (Quadro de Cargos oficial)</label>
+    <input type="number" name="vagas_qc" min="0" value="{{ cargo.vagas_qc if cargo else 0 }}">
+  </div>
+  <div>
+    <label>Vagas no QCP (Quadro de Cargos Previstos da OM)</label>
+    <input type="number" name="vagas_qcp" min="0" value="{{ cargo.vagas_qcp if cargo else 1 }}">
+  </div>
+  <div>
+    <label>Habilitação exigida</label>
+    <input type="text" name="habilitacao_exigida" value="{{ cargo.habilitacao_exigida if cargo else '' }}">
+  </div>
+  <div>
+    <label>Habilitação confirmada?</label>
+    <select name="habilitacao_confirmada">
+      <option value="1" {{ 'selected' if cargo and cargo.habilitacao_confirmada else '' }}>Sim</option>
+      <option value="" {{ 'selected' if cargo and not cargo.habilitacao_confirmada else '' }}>Não</option>
+    </select>
+  </div>
+  <div class="full">
+    <label>Observações</label>
+    <textarea name="observacoes" rows="3">{{ cargo.observacoes if cargo else '' }}</textarea>
+  </div>
+  <div class="full acoes-form">
+    <button class="btn" type="submit">Salvar</button>
+    <a class="btn btn-secundario" href="{{ url_for('cargos.listar') }}">Cancelar</a>
+    {% if cargo %}
+    <form method="POST" action="{{ url_for('cargos.excluir', cargo_id=cargo.id) }}"
+          onsubmit="return confirm('Excluir este cargo?');">
+      <button class="btn btn-perigo" type="submit">Excluir cargo</button>
+    </form>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

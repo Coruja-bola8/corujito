@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Condecorações{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Condecorações</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('condecoracoes.novo') }}">+ Nova condecoração</a>{% endif %}
+</div>
+
+<form class="busca-form" method="GET">
+  <input type="text" name="medalha" placeholder="Filtrar por nome da medalha..." value="{{ busca_medalha }}">
+  <button class="btn btn-secundario" type="submit">Filtrar</button>
+</form>
+
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Militar</th><th>Medalha/Condecoração</th><th>Data</th><th>Órgão concessor</th><th></th></tr></thead>
+    <tbody>
+      {% for c in registros %}
+      <tr>
+        <td><a href="{{ url_for('pessoal.ficha', militar_id=c.militar_id) }}">{{ c.militar.nome }}</a></td>
+        <td>{{ c.medalha }}</td>
+        <td>{{ c.data_concessao.strftime('%d/%m/%Y') if c.data_concessao else "-" }}</td>
+        <td>{{ c.orgao_concessor or "-" }}</td>
+        <td>{% if current_user.is_admin %}<a class="btn btn-sm btn-secundario" href="{{ url_for('condecoracoes.editar', registro_id=c.id) }}">Editar</a>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="vazio">Nenhuma condecoração encontrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

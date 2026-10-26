@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Relatório por Medalha{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>Relatório por Medalha/Condecoração</h1></div>
+<p><a href="{{ url_for('relatorios.index') }}">&larr; Voltar para relatórios</a></p>
+
+<form class="busca-form" method="GET" style="max-width:400px;">
+  <select name="medalha" onchange="this.form.submit()">
+    <option value="">-- selecione uma medalha --</option>
+    {% for m in medalhas %}
+    <option value="{{ m }}" {{ 'selected' if medalha_selecionada == m else '' }}>{{ m }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+{% if medalha_selecionada %}
+<h2 class="secao-titulo">{{ medalha_selecionada }} — {{ registros|length }} militar(es)</h2>
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Militar</th><th>Posto/Grad</th><th>Data de concessão</th><th>Órgão concessor</th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td><a href="{{ url_for('pessoal.ficha', militar_id=r.militar_id) }}">{{ r.militar.nome }}</a></td>
+        <td>{{ r.militar.posto_grad }}</td>
+        <td>{{ r.data_concessao.strftime('%d/%m/%Y') if r.data_concessao else "-" }}</td>
+        <td>{{ r.orgao_concessor or "-" }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="vazio">Nenhum registro encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

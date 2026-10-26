@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Curso{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>{{ 'Editar' if registro else 'Novo' }} curso</h1></div>
+
+<form method="POST" class="form-grid">
+  <div class="full">
+    <label>Militar</label>
+    <select name="militar_id" required>
+      <option value="">-- selecione --</option>
+      {% for m in militares %}
+      <option value="{{ m.id }}" {{ 'selected' if (registro and registro.militar_id == m.id) or militar_id == m.id else '' }}>{{ m.nome }} ({{ m.posto_grad }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="full">
+    <label>Nome do curso</label>
+    <input type="text" name="nome_curso" required value="{{ registro.nome_curso if registro else '' }}">
+  </div>
+  <div>
+    <label>Instituição</label>
+    <input type="text" name="instituicao" value="{{ registro.instituicao if registro else '' }}">
+  </div>
+  <div>
+    <label>Data de conclusão</label>
+    <input type="date" name="data_conclusao" value="{{ registro.data_conclusao if registro else '' }}">
+  </div>
+  <div>
+    <label>Carga horária</label>
+    <input type="number" name="carga_horaria" value="{{ registro.carga_horaria if registro else '' }}">
+  </div>
+  <div class="full">
+    <label>Observações</label>
+    <textarea name="observacoes" rows="3">{{ registro.observacoes if registro else '' }}</textarea>
+  </div>
+  <div class="full acoes-form">
+    <button class="btn" type="submit">Salvar</button>
+    <a class="btn btn-secundario" href="{{ url_for('cursos.listar') }}">Cancelar</a>
+    {% if registro %}
+    <form method="POST" action="{{ url_for('cursos.excluir', registro_id=registro.id) }}" onsubmit="return confirm('Excluir este curso?');">
+      <button class="btn btn-perigo" type="submit">Excluir</button>
+    </form>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

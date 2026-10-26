@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}Gestão Administrativa{% endblock %} — SGAUM</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">Gestão Administrativa<small>Unidade Militar — SGAUM</small></div>
+      <nav>
+        <a href="{{ url_for('dashboard.index') }}"          class="{{ 'ativo' if request.blueprint=='dashboard' else '' }}">Dashboard</a>
+        <a href="{{ url_for('pessoal.listar') }}"           class="{{ 'ativo' if request.blueprint=='pessoal' else '' }}">Pessoal</a>
+        <a href="{{ url_for('cargos.listar') }}"            class="{{ 'ativo' if request.blueprint=='cargos' else '' }}">Cargos (QCP)</a>
+        <a href="{{ url_for('verba_operacional.listar') }}" class="{{ 'ativo' if request.blueprint=='verba_operacional' else '' }}">Verba Operacional</a>
+        <a href="{{ url_for('verba_adm.listar') }}"         class="{{ 'ativo' if request.blueprint=='verba_adm' else '' }}">Verba Adm. (CIE/FUNADOM)</a>
+        <a href="{{ url_for('estagios.listar_turmas') }}"   class="{{ 'ativo' if request.blueprint=='estagios' else '' }}">Estágios</a>
+        <a href="{{ url_for('parceiros.listar') }}"         class="{{ 'ativo' if request.blueprint=='parceiros' else '' }}">Parceiros</a>
+        <a href="{{ url_for('condecoracoes.listar') }}"     class="{{ 'ativo' if request.blueprint=='condecoracoes' else '' }}">Condecorações</a>
+        <a href="{{ url_for('cursos.listar') }}"            class="{{ 'ativo' if request.blueprint=='cursos' else '' }}">Cursos</a>
+        <a href="{{ url_for('relatorios.index') }}"         class="{{ 'ativo' if request.blueprint=='relatorios' else '' }}">Relatórios</a>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+        <a href="{{ url_for('importacao.index') }}"         class="{{ 'ativo' if request.blueprint=='importacao' else '' }}">Importar CSV</a>
+        <a href="{{ url_for('usuarios.listar') }}"          class="{{ 'ativo' if request.blueprint=='usuarios' else '' }}">Usuários</a>
+        {% endif %}
+      </nav>
+
+      {% if current_user.is_authenticated %}
+      <div class="rodape-usuario">
+        <div style="font-weight:600; font-size:13px;">{{ current_user.nome_completo }}</div>
+        <div class="papel" style="font-size:11px; opacity:0.7; margin-bottom:10px;">
+          {{ 'Administrador' if current_user.is_admin else 'Somente leitura' }}
+        </div>
+        {# Botão de Logout — abre confirmação antes de encerrar #}
+        <a href="#" onclick="confirmarLogout(); return false;" class="btn-logout">
+          &#x2192; Encerrar sessão
+        </a>
+        {# Link oculto real de logout #}
+        <a id="link-logout-real" href="{{ url_for('auth.logout') }}" style="display:none;"></a>
+      </div>
+      {% endif %}
+    </aside>
+
+    <main class="conteudo">
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% for categoria, mensagem in mensagens %}
+          <div class="flash flash-{{ categoria }}">{{ mensagem }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% block conteudo %}{% endblock %}
+    </main>
+  </div>
+
+  {# ── Banner de aviso de sessão inativa (30 min) ── #}
+  <div id="banner-sessao">
+    <button class="fechar-banner" onclick="document.getElementById('banner-sessao').style.display='none'">✕</button>
+    <strong>⏱ Sessão inativa</strong>
+    Você está inativo há mais de 25 minutos. Faça logoff ao terminar o uso para proteger os dados.
+  </div>
+
+  {# ── Modal de confirmação de logout ── #}
+  <div class="modal-overlay" id="modal-logout">
+    <div class="modal-box">
+      <h3>Encerrar sessão</h3>
+      <p>Certifique-se de que todos os dados foram salvos antes de sair.<br>
+         Registros editados são salvos automaticamente ao clicar em <strong>Salvar</strong> em cada formulário.
+         Deseja encerrar a sessão agora?</p>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModalLogout()">Cancelar</button>
+        <a class="btn btn-perigo" href="{{ url_for('auth.logout') if current_user.is_authenticated else '/' }}">Encerrar sessão</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ── Confirmação de logout ─────────────────────────────────────
+  function confirmarLogout() {
+    document.getElementById('modal-logout').classList.add('aberto');
+  }
+  function fecharModalLogout() {
+    document.getElementById('modal-logout').classList.remove('aberto');
+  }
+
+  // ── Aviso de inatividade (25 min) ────────────────────────────
+  let timerInatividade;
+  function resetarTimer() {
+    clearTimeout(timerInatividade);
+    timerInatividade = setTimeout(function() {
+      document.getElementById('banner-sessao').style.display = 'block';
+    }, 25 * 60 * 1000); // 25 minutos
+  }
+  ['mousemove','keydown','click','scroll','touchstart'].forEach(function(ev) {
+    document.addEventListener(ev, resetarTimer, { passive: true });
+  });
+  resetarTimer();
+
+  // ── Aviso ao tentar fechar o navegador com formulário aberto ─
+  let formularioModificado = false;
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form input, form select, form textarea').forEach(function(el) {
+      el.addEventListener('change', function() { formularioModificado = true; });
+      el.addEventListener('input',  function() { formularioModificado = true; });
+    });
+    // Ao enviar o formulário, desativa o aviso
+    document.querySelectorAll('form').forEach(function(form) {
+      form.addEventListener('submit', function() { formularioModificado = false; });
+    });
+  });
+  window.addEventListener('beforeunload', function(e) {
+    if (formularioModificado) {
+      e.preventDefault();
+      e.returnValue = 'Você tem alterações não salvas. Deseja sair mesmo assim?';
+    }
+  });
+  </script>
+</body>
+</html>

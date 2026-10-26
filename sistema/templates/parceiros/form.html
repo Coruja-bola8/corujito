@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if parceiro else 'Novo' }} Parceiro{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>{{ 'Editar parceiro' if parceiro else 'Novo parceiro' }}</h1></div>
+
+<form method="POST" class="form-grid">
+  <h2 class="secao-titulo full" style="margin-top:0;">Identificação pessoal</h2>
+  <div class="full">
+    <label>Nome completo</label>
+    <input type="text" name="nome" required value="{{ parceiro.nome if parceiro else '' }}">
+  </div>
+  <div>
+    <label>CPF</label>
+    <input type="text" name="cpf" value="{{ parceiro.cpf if parceiro else '' }}">
+  </div>
+  <div>
+    <label>Telefone / Contato</label>
+    <input type="text" name="telefone" value="{{ parceiro.telefone if parceiro else '' }}">
+  </div>
+  <div class="full">
+    <label>E-mail</label>
+    <input type="email" name="email" value="{{ parceiro.email if parceiro else '' }}">
+  </div>
+
+  <h2 class="secao-titulo full">Vínculo institucional</h2>
+  <div>
+    <label>Empresa / Instituição</label>
+    <input type="text" name="empresa_instituicao" value="{{ parceiro.empresa_instituicao if parceiro else '' }}">
+  </div>
+  <div>
+    <label>Departamento</label>
+    <input type="text" name="departamento" value="{{ parceiro.departamento if parceiro else '' }}">
+  </div>
+  <div class="full">
+    <label>Referência / Indicado por</label>
+    <select name="referencia_id">
+      <option value="">-- nenhuma --</option>
+      {% for p in todos_parceiros %}
+      <option value="{{ p.id }}" {{ 'selected' if parceiro and parceiro.referencia_id == p.id else '' }}>
+        {{ p.nome }} {% if p.empresa_instituicao %}({{ p.empresa_instituicao }}){% endif %}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <h2 class="secao-titulo full">Estágio / Participação</h2>
+  <div>
+    <label>Estágio CIE relacionado</label>
+    <input type="text" name="estagio_cie" value="{{ parceiro.estagio_cie if parceiro else '' }}">
+  </div>
+  <div>
+    <label>Status de participação</label>
+    <input type="text" name="status_participacao" value="{{ parceiro.status_participacao if parceiro else '' }}">
+  </div>
+
+  <h2 class="secao-titulo full">Condecorações recebidas</h2>
+  <div class="full">
+    <label>Selecione as condecorações recebidas</label>
+    {% set conds_atuais = (parceiro.condecoracoes_recebidas or '').split(', ') if parceiro and parceiro.condecoracoes_recebidas else [] %}
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:4px;">
+      {% for opcao in condecoracoes_opcoes %}
+      <label style="display:flex; align-items:center; gap:6px; font-weight:normal; cursor:pointer;">
+        <input type="checkbox" name="condecoracoes_recebidas" value="{{ opcao }}"
+               {{ 'checked' if opcao in conds_atuais else '' }}>
+        {{ opcao }}
+      </label>
+      {% endfor %}
+    </div>
+    <div style="margin-top:8px;">
+      <label style="font-weight:normal;">Se "Outra", especifique:</label>
+      {% set outra_val = '' %}
+      {% for c in conds_atuais %}{% if c.startswith('Outra:') %}{% set outra_val = c[7:] %}{% endif %}{% endfor %}
+      <input type="text" name="condecoracoes_outra" style="margin-top:4px;"
+             value="{{ outra_val }}" placeholder="Nome da condecoração...">
+    </div>
+  </div>
+  <div>
+    <label>Data da condecoração</label>
+    <input type="date" name="data_condecoracoes" value="{{ parceiro.data_condecoracoes if parceiro and parceiro.data_condecoracoes else '' }}">
+  </div>
+  <div>
+    <label>Local da cerimônia</label>
+    <input type="text" name="local_condecoracoes" value="{{ parceiro.local_condecoracoes if parceiro else '' }}">
+  </div>
+
+  <h2 class="secao-titulo full">Histórico de relacionamento</h2>
+  <div>
+    <label>Data da última visita ao escritório</label>
+    <input type="date" name="data_ultima_visita" value="{{ parceiro.data_ultima_visita if parceiro and parceiro.data_ultima_visita else '' }}">
+  </div>
+  <div>
+    <label>Data do último encontro</label>
+    <input type="date" name="data_ultimo_encontro" value="{{ parceiro.data_ultimo_encontro if parceiro and parceiro.data_ultimo_encontro else '' }}">
+  </div>
+  <div class="full">
+    <label>Local do último encontro</label>
+    <input type="text" name="local_ultimo_encontro" value="{{ parceiro.local_ultimo_encontro if parceiro else '' }}">
+  </div>
+
+  <div class="full">
+    <label>Observações</label>
+    <textarea name="observacoes" rows="3">{{ parceiro.observacoes if parceiro else '' }}</textarea>
+  </div>
+
+  <div class="full acoes-form">
+    <button class="btn" type="submit">Salvar</button>
+    <a class="btn btn-secundario" href="{{ url_for('parceiros.listar') }}">Cancelar</a>
+    {% if parceiro %}
+    <form method="POST" action="{{ url_for('parceiros.excluir', parceiro_id=parceiro.id) }}"
+          onsubmit="return confirm('Excluir este parceiro?');">
+      <button class="btn btn-perigo" type="submit">Excluir parceiro</button>
+    </form>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

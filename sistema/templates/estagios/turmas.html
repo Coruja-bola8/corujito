@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titulo %}Estágios{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Turmas de Estágio Externo</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('estagios.nova_turma') }}">+ Nova turma</a>{% endif %}
+</div>
+
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Turma</th><th>Doc. ref.</th><th>Prazo indicação</th><th>Presencial</th><th></th></tr></thead>
+    <tbody>
+      {% for t in turmas %}
+      <tr>
+        <td>{{ t.estagio_turno }}</td>
+        <td>{{ t.doc_ref or "-" }}</td>
+        <td>{{ t.prazo_indicacao.strftime('%d/%m/%Y') if t.prazo_indicacao else "-" }}</td>
+        <td>
+          {% if t.dt_inicio_presencial and t.dt_fim_presencial %}
+            {{ t.dt_inicio_presencial.strftime('%d/%m') }} a {{ t.dt_fim_presencial.strftime('%d/%m/%Y') }}
+          {% else %}-{% endif %}
+        </td>
+        <td>
+          <a class="btn btn-sm btn-secundario" href="{{ url_for('estagios.listar_participantes', turma_id=t.id) }}">Participantes</a>
+          {% if current_user.is_admin %}<a class="btn btn-sm btn-secundario" href="{{ url_for('estagios.editar_turma', turma_id=t.id) }}">Editar</a>{% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="vazio">Nenhuma turma cadastrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

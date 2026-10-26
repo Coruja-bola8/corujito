@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titulo %}Ficha - {{ m.nome }}{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>{{ m.nome }}</h1>
+  {% if current_user.is_admin %}<a class="btn btn-secundario" href="{{ url_for('pessoal.editar', militar_id=m.id) }}">Editar dados</a>{% endif %}
+</div>
+
+<div class="grid-cards">
+  <div class="card"><strong>Posto/Grad:</strong> {{ m.posto_grad }}</div>
+  <div class="card"><strong>CPF:</strong> {{ m.cpf or "-" }}</div>
+  <div class="card"><strong>Situação:</strong> {{ m.situacao or "-" }}</div>
+  <div class="card"><strong>Tempo de sede:</strong> {{ m.intervalo_tempo_sede }}</div>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+  <strong>Arma:</strong> {{ m.arma or "-" }} &nbsp;|&nbsp;
+  <strong>Círculo:</strong> {{ m.circulo or "-" }} &nbsp;|&nbsp;
+  <strong>Ano de formação:</strong> {{ m.ano_formacao or "-" }} &nbsp;|&nbsp;
+  <strong>Data de praça:</strong> {{ m.dt_praca.strftime('%d/%m/%Y') if m.dt_praca else "-" }} &nbsp;|&nbsp;
+  <strong>Última promoção:</strong> {{ m.dt_ult_promocao.strftime('%d/%m/%Y') if m.dt_ult_promocao else "-" }}
+  {% if m.observacoes %}<div style="margin-top:8px;"><strong>Obs.:</strong> {{ m.observacoes }}</div>{% endif %}
+</div>
+
+{% if m.cargos %}
+<h2 class="secao-titulo">Cargo ocupado no QCP</h2>
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Cargo</th><th>Categoria</th><th>Habilitação exigida</th><th>Confirmada</th></tr></thead>
+    <tbody>
+      {% for c in m.cargos %}
+      <tr><td>{{ c.cargo }}</td><td>{{ c.categoria_posto_previsto }}</td><td>{{ c.habilitacao_exigida or "-" }}</td><td>{{ "Sim" if c.habilitacao_confirmada else "Não" }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="topo-pagina" style="margin-top:26px;">
+  <h2 class="secao-titulo" style="margin:0;">Condecorações</h2>
+  {% if current_user.is_admin %}<a class="btn btn-sm" href="{{ url_for('condecoracoes.novo', militar_id=m.id) }}">+ Adicionar</a>{% endif %}
+</div>
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Medalha/Condecoração</th><th>Data</th><th>Órgão concessor</th><th></th></tr></thead>
+    <tbody>
+      {% for c in m.condecoracoes %}
+      <tr>
+        <td>{{ c.medalha }}</td>
+        <td>{{ c.data_concessao.strftime('%d/%m/%Y') if c.data_concessao else "-" }}</td>
+        <td>{{ c.orgao_concessor or "-" }}</td>
+        <td>{% if current_user.is_admin %}<a class="btn btn-sm btn-secundario" href="{{ url_for('condecoracoes.editar', registro_id=c.id) }}">Editar</a>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="vazio">Nenhuma condecoração registrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="topo-pagina" style="margin-top:26px;">
+  <h2 class="secao-titulo" style="margin:0;">Cursos</h2>
+  {% if current_user.is_admin %}<a class="btn btn-sm" href="{{ url_for('cursos.novo', militar_id=m.id) }}">+ Adicionar</a>{% endif %}
+</div>
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Curso</th><th>Instituição</th><th>Conclusão</th><th>Carga horária</th><th></th></tr></thead>
+    <tbody>
+      {% for c in m.cursos %}
+      <tr>
+        <td>{{ c.nome_curso }}</td>
+        <td>{{ c.instituicao or "-" }}</td>
+        <td>{{ c.data_conclusao.strftime('%d/%m/%Y') if c.data_conclusao else "-" }}</td>
+        <td>{{ c.carga_horaria or "-" }}</td>
+        <td>{% if current_user.is_admin %}<a class="btn btn-sm btn-secundario" href="{{ url_for('cursos.editar', registro_id=c.id) }}">Editar</a>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="vazio">Nenhum curso registrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

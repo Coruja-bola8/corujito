@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block titulo %}Cargos (QCP){% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Quadro de Cargos Previstos (QCP)</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('cargos.novo') }}">+ Novo cargo</a>{% endif %}
+</div>
+
+{% if current_user.is_admin %}
+{# FORM principal: exclusão em massa via checkboxes #}
+<form id="form-massa" method="POST" action="{{ url_for('cargos.excluir_em_massa') }}">
+  <input type="hidden" name="ids" id="ids-selecionados">
+  <div class="barra-selecao" id="barra-selecao">
+    <span class="contador" id="contador-selecao">0 selecionados</span>
+    <button type="button" class="btn-selecionar-todos-link" onclick="selecionarTodos()">Selecionar todos ({{ registros|length }})</button>
+    <button type="button" class="btn-selecionar-todos-link" onclick="limparSelecao()">Limpar seleção</button>
+    <button type="submit" class="btn btn-excluir-massa btn-sm" onclick="return confirmarExclusao()">Excluir selecionados</button>
+  </div>
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-cb"><input type="checkbox" class="cb-todos" id="cb-todos" onchange="toggleTodos(this)"></th>
+          <th>Cargo</th><th>Categoria</th><th>QC</th><th>QCP</th><th>Ocupante</th><th>Habilitação</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in registros %}
+        <tr>
+          <td class="col-cb"><input type="checkbox" class="cb-linha" value="{{ r.id }}" onchange="atualizarSelecao()"></td>
+          <td>{{ r.cargo }}</td>
+          <td>{{ r.categoria_posto_previsto }}</td>
+          <td style="text-align:center;">{{ r.vagas_qc or 0 }}</td>
+          <td style="text-align:center;">{{ r.vagas_qcp or 1 }}</td>
+          <td>{{ r.ocupante.nome if r.ocupante else "—" }}</td>
+          <td>{{ r.habilitacao_exigida or "-" }}</td>
+          <td>
+            {% if r.status_conformidade == "Conforme" %}<span class="badge badge-verde">Conforme</span>
+            {% elif r.status_conformidade == "Claro (vago)" %}<span class="badge badge-vermelho">Claro (vago)</span>
+            {% else %}<span class="badge badge-amarelo">Hab. pendente</span>{% endif %}
+          </td>
+          <td style="white-space:nowrap;">
+            <a class="btn btn-sm btn-secundario" href="{{ url_for('cargos.editar', cargo_id=r.id) }}">Editar</a>
+            {#
+              CORREÇÃO BUG: botão Excluir individual não pode ser um <form> aninhado
+              dentro do form de exclusão em massa. Usamos data-* e submetemos via JS.
+            #}
+            <button type="button"
+                    class="btn btn-sm btn-perigo"
+                    onclick="excluirUm({{ r.id }}, '{{ r.cargo|replace("'","\\'")|replace('"','\\"') }}')">
+              Excluir
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="vazio">Nenhum cargo cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+{# Form oculto para exclusão individual — fora do form principal #}
+<form id="form-excluir-um" method="POST" style="display:none;">
+  <input type="hidden" name="ids" id="id-excluir-um">
+</form>
+
+{% else %}
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Cargo</th><th>Categoria</th><th>QC</th><th>QCP</th><th>Ocupante</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td>{{ r.cargo }}</td><td>{{ r.categoria_posto_previsto }}</td>
+        <td style="text-align:center;">{{ r.vagas_qc or 0 }}</td>
+        <td style="text-align:center;">{{ r.vagas_qcp or 1 }}</td>
+        <td>{{ r.ocupante.nome if r.ocupante else "—" }}</td>
+        <td>{{ r.status_conformidade }}</td>
+      </tr>
+      {% else %}<tr><td colspan="6" class="vazio">Nenhum cargo.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<script>
+// ── Exclusão individual (corrige bug de form aninhado) ────────────────────
+function excluirUm(id, nome) {
+  if (!confirm('Excluir o cargo "' + nome + '"?\nEsta ação é irreversível.')) return;
+  const form = document.getElementById('form-excluir-um');
+  form.action = '/cargos/' + id + '/excluir';
+  document.getElementById('id-excluir-um').value = id;
+  form.submit();
+}
+
+// ── Exclusão em massa ─────────────────────────────────────────────────────
+function getCbs() { return Array.from(document.querySelectorAll('.cb-linha')); }
+function atualizarSelecao() {
+  const sel = getCbs().filter(cb => cb.checked);
+  document.getElementById('ids-selecionados').value = sel.map(cb => cb.value).join(',');
+  document.getElementById('contador-selecao').textContent = sel.length + ' selecionado(s)';
+  const b = document.getElementById('barra-selecao');
+  sel.length > 0 ? b.classList.add('visivel') : b.classList.remove('visivel');
+  getCbs().forEach(cb => { cb.closest('tr').classList.toggle('selecionada', cb.checked); });
+  const ct = document.getElementById('cb-todos');
+  if (ct) {
+    ct.indeterminate = sel.length > 0 && sel.length < getCbs().length;
+    ct.checked = sel.length === getCbs().length && getCbs().length > 0;
+  }
+}
+function toggleTodos(cb) { getCbs().forEach(c => { c.checked = cb.checked; }); atualizarSelecao(); }
+function selecionarTodos() { getCbs().forEach(c => { c.checked = true; }); atualizarSelecao(); }
+function limparSelecao() {
+  getCbs().forEach(c => { c.checked = false; });
+  const ct = document.getElementById('cb-todos');
+  if (ct) { ct.checked = false; ct.indeterminate = false; }
+  atualizarSelecao();
+}
+function confirmarExclusao() {
+  const n = getCbs().filter(cb => cb.checked).length;
+  if (n === 0) { alert('Selecione ao menos um.'); return false; }
+  return confirm('Excluir ' + n + ' cargo(s)?\nEsta ação é irreversível.');
+}
+</script>
+{% endblock %}

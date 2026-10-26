@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block titulo %}Dashboard{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>Dashboard</h1><span class="texto-suave">{{ hoje.strftime('%d/%m/%Y') }}</span></div>
+
+<div class="grid-cards">
+  <div class="card card-metrica">
+    <div class="valor">{{ efetivo_total }}</div>
+    <div class="rotulo">Efetivo cadastrado</div>
+  </div>
+  <div class="card card-metrica">
+    <div class="valor">{{ efetivo_qcp_total }}</div>
+    <div class="rotulo">Vagas previstas (QCP)</div>
+  </div>
+  <div class="card card-metrica">
+    <div class="valor">R$ {{ "%.2f"|format(recebido_total) }}</div>
+    <div class="rotulo">Verba operacional Acumulada</div>
+  </div>
+  <div class="card card-metrica {{ 'alerta' if empenhos_vencendo|length > 0 else '' }}">
+    <div class="valor">{{ empenhos_vencendo|length }}</div>
+    <div class="rotulo">Empenhos vencendo (30 dias)</div>
+  </div>
+</div>
+
+{# nn PARTE A: Seletor de período (formulário) nnnnnnnnnnnnn #}
+<h2 class='secao-titulo'>Verba Operacional</h2>
+  <form method='GET' action="{{ url_for('dashboard.index') }}"
+  style='display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;margin-bottom:16px;'>
+<div>
+  <label style='font-size:13px; font-weight:600; display:block; margin-bottom:4px;'>Ano
+    </label>
+      <select name='ano' style='padding:7px 10px;border:1px solid var(--borda); border-radius:5px; font-size:14px;'>
+    <option value=''>Todos os anos
+      </option>
+{% for ano in anos_disponiveis %}
+    <option value='{{ ano }}'{{ 'selected' if ano_filtro == ano else '' }}>{{ ano }}
+      </option>
+{% endfor %}
+    </select>
+  </div>
+  <div>
+    <label style='font-size:13px; font-weight:600; display:block;margin-bottom:4px;'>Semestre</label>
+    <select name='semestre' style='padding:7px 10px; border:1px solid var(--borda); border-radius:5px; font-size:14px;'>
+      <option value=''>Ano completo</option>
+      <option value='1'{{ 'selected' if sem_filtro == '1' else '' }}>1o Sem (Jan-Jun)</option>
+      <option value='2'{{ 'selected' if sem_filtro == '2' else '' }}>2o Sem (Jul-Dez)</option>
+    </select>
+  </div>
+    <button class='btn' type='submit'>Filtrar</button>
+
+    {% if ano_filtro or sem_filtro %}
+  <a href="{{ url_for('dashboard.index') }}"class='btn btn-secundario'>Limpar filtro
+    </a>
+{% endif %}
+</form>
+{# nn PARTE B: Cards com o resultado filtrado nnnnnnnnnnnnnn #}
+<div class='grid-cards'>
+  <div class='card card-metrica'>
+    <div class='valor'>R$ {{ '%.2f'|format(recebido_total) }}</div>
+    <div class='rotulo'>Verba recebida — {{ label_periodo }}</div>
+  </div>
+    <div class='card card-metrica {{ "alerta" if a_prestar > 0 else "" }}'>
+    <div class='valor'>R$ {{ '%.2f'|format(a_prestar) }}
+      </div>
+      <div class='rotulo'>A prestar conta — {{ label_periodo }}
+    </div>
+  </div>
+</div>
+{# nn FIM DO BLOCO DE VERBA OPERACIONAL nnnnnnnnnnnnnnnnnnnn #}
+
+{# Seletor de Efetivo e situacao#}
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:22px;"></div>
+  <div>
+    <h2 class="secao-titulo">Efetivo por situação</h2>
+    <div class="card">
+      {% for situacao, qtd in efetivo_por_situacao %}
+      <div class="barra-linha">
+        <div class="barra-rotulo">{{ situacao or "Não informado" }}</div>
+        <div class="barra-fundo"><div class="barra-preenchida" style="width:{{ (qtd/efetivo_total*100) if efetivo_total else 0 }}%"></div></div>
+        <div class="barra-valor">{{ qtd }}</div>
+      </div>
+      {% else %}<p class="texto-suave">Nenhum militar cadastrado.</p>{% endfor %}
+    </div>
+  </div>
+
+  <div>
+    <h2 class="secao-titulo">Claros por categoria — QC / QCP</h2>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr style="background:var(--areia-escura);">
+            <th style="padding:7px 10px; text-align:left;">Categoria</th>
+            <th style="padding:7px 6px; text-align:center;" title="Vagas no QC oficial">QC</th>
+            <th style="padding:7px 6px; text-align:center;" title="Vagas no QCP da OM">QCP</th>
+            <th style="padding:7px 6px; text-align:center;">Ocupados</th>
+            <th style="padding:7px 6px; text-align:center;" title="Claros no QCP">Claros QCP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in claros_por_categoria %}
+          <tr style="border-bottom:1px solid var(--borda);">
+            <td style="padding:6px 10px;">{{ c.categoria }}</td>
+            <td style="padding:6px; text-align:center;">{{ c.vagas_qc }}</td>
+            <td style="padding:6px; text-align:center;">{{ c.vagas_qcp }}</td>
+            <td style="padding:6px; text-align:center;">{{ c.ocupados }}</td>
+            <td style="padding:6px; text-align:center;">
+              {% if c.claros_qcp > 0 %}
+                <span class="badge badge-vermelho">{{ c.claros_qcp }}</span>
+              {% else %}
+                <span class="badge badge-verde">0</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="vazio">Nenhum cargo no QCP.</td></tr>
+          {% endfor %}
+          <tr style="background:var(--areia-escura); font-weight:600;">
+            <td style="padding:7px 10px;">TOTAL</td>
+            <td style="padding:7px 6px; text-align:center;">{{ efetivo_qc_total }}</td>
+            <td style="padding:7px 6px; text-align:center;">{{ efetivo_qcp_total }}</td>
+            <td style="padding:7px 6px; text-align:center;">{{ claros_por_categoria|sum(attribute='ocupados') }}</td>
+            <td style="padding:7px 6px; text-align:center;">{{ claros_por_categoria|sum(attribute='claros_qcp') }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<h2 class="secao-titulo">Verba Administrativa por fonte</h2>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:22px;">
+  <div>
+    <div class="card">
+      <strong style="font-size:13px; color:var(--texto-suave);">Total geral por fonte</strong>
+      {% for fonte, valor in verba_por_fonte %}
+      <div class="barra-linha" style="margin-top:8px;">
+        <div class="barra-rotulo">{{ fonte }}</div>
+        <div class="barra-valor" style="width:auto; font-weight:600;">R$ {{ "%.2f"|format(valor) }}</div>
+      </div>
+      {% else %}<p class="texto-suave" style="margin-top:8px;">Nenhuma NC cadastrada.</p>{% endfor %}
+    </div>
+  </div>
+  <div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div style="padding:10px 12px; background:var(--areia-escura); font-size:13px; font-weight:600; color:var(--verde-escuro);">
+        Histórico por semestre — {{ ano_atual }}
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <thead>
+          <tr style="background:var(--areia-escura);">
+            <th style="padding:6px 10px; text-align:left;">Semestre</th>
+            <th style="padding:6px; text-align:left;">Fonte</th>
+            <th style="padding:6px; text-align:right;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sem in verba_semestral %}
+            {% for fonte, valor in sem.dados %}
+            <tr style="border-bottom:1px solid var(--borda);">
+              <td style="padding:5px 10px;">{{ sem.semestre }}</td>
+              <td style="padding:5px 8px;">{{ fonte }}</td>
+              <td style="padding:5px 8px; text-align:right;">R$ {{ "%.2f"|format(valor) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" style="padding:5px 10px; color:var(--texto-suave);">{{ sem.semestre }} — sem lançamentos</td></tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if verba_anual_por_fonte %}
+<h2 class="secao-titulo">Histórico anual por fonte</h2>
+<div class="card" style="padding:0; overflow:hidden; margin-bottom:22px;">
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <thead>
+      <tr style="background:var(--verde-escuro);">
+        <th style="padding:8px 12px; color:white; text-align:left;">Ano</th>
+        <th style="padding:8px; color:white; text-align:left;">Fonte</th>
+        <th style="padding:8px; color:white; text-align:right;">Total recebido</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for fonte, ano, total in verba_anual_por_fonte %}
+      <tr style="border-bottom:1px solid var(--borda);">
+        <td style="padding:6px 12px;">{{ ano|int }}</td>
+        <td style="padding:6px 8px;">{{ fonte }}</td>
+        <td style="padding:6px 8px; text-align:right; font-weight:600;">R$ {{ "%.2f"|format(total) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+  <div>
+    <h2 class="secao-titulo">Empenhos vencendo (30 dias)</h2>
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>NC</th><th>Fonte</th><th>Prazo</th></tr></thead>
+        <tbody>
+          {% for r in empenhos_vencendo %}
+          <tr><td><a href="{{ url_for('verba_adm.editar', registro_id=r.id) }}">{{ r.nc }}</a></td><td>{{ r.fonte }}</td><td>{{ r.prazo_empenho.strftime('%d/%m/%Y') }}</td></tr>
+          {% else %}<tr><td colspan="3" class="vazio">Nenhum prazo próximo.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div>
+    <h2 class="secao-titulo">Liquidações vencendo (30 dias)</h2>
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>NC</th><th>Fonte</th><th>Prazo</th></tr></thead>
+        <tbody>
+          {% for r in liquidacoes_vencendo %}
+          <tr><td><a href="{{ url_for('verba_adm.editar', registro_id=r.id) }}">{{ r.nc }}</a></td><td>{{ r.fonte }}</td><td>{{ r.prazo_liquidacao.strftime('%d/%m/%Y') }}</td></tr>
+          {% else %}<tr><td colspan="3" class="vazio">Nenhum prazo próximo.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<h2 class="secao-titulo">Estágios recentes — indicados x fizeram</h2>
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Turma</th><th>Indicados</th><th>Efetivamente fizeram</th></tr></thead>
+    <tbody>
+      {% for item in resumo_turmas %}
+      <tr>
+        <td><a href="{{ url_for('estagios.listar_participantes', turma_id=item.turma.id) }}">{{ item.turma.estagio_turno }}</a></td>
+        <td>{{ item.indicados }}</td>
+        <td>{{ item.fizeram }}</td>
+      </tr>
+      {% else %}<tr><td colspan="3" class="vazio">Nenhuma turma cadastrada.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

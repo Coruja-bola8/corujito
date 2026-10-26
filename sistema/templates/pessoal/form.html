@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if militar else 'Novo' }} Militar{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>{{ 'Editar militar' if militar else 'Novo militar' }}</h1></div>
+
+<form method="POST" class="form-grid">
+  <div class="full">
+    <label>Nome completo</label>
+    <input type="text" name="nome" required value="{{ militar.nome if militar else '' }}">
+  </div>
+  <div>
+    <label>CPF</label>
+    <input type="text" name="cpf" value="{{ militar.cpf if militar else '' }}">
+  </div>
+  <div>
+    <label>IDT</label>
+    <input type="text" name="idt" value="{{ militar.idt if militar else '' }}">
+  </div>
+  <div>
+    <label>Posto/Graduação</label>
+    <input type="text" name="posto_grad" required value="{{ militar.posto_grad if militar else '' }}">
+  </div>
+  <div>
+    <label>Categoria (para contagem de claros no QCP)</label>
+    <select name="categoria_posto">
+      <option value="">-- selecione --</option>
+      {% for cat in categorias %}
+      <option value="{{ cat }}" {{ 'selected' if militar and militar.categoria_posto == cat else '' }}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Arma</label>
+    <input type="text" name="arma" value="{{ militar.arma if militar else '' }}">
+  </div>
+  <div>
+    <label>Situação</label>
+    <select name="situacao">
+      <option value="">-- selecione --</option>
+      {% for opt in ["Ativa", "PTTC", "Disponível", "Reserva"] %}
+      <option value="{{ opt }}" {{ 'selected' if militar and militar.situacao == opt else '' }}>{{ opt }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>Círculo</label>
+    <input type="text" name="circulo" value="{{ militar.circulo if militar else '' }}">
+  </div>
+  <div>
+    <label>Ano de formação</label>
+    <input type="number" name="ano_formacao" value="{{ militar.ano_formacao if militar else '' }}">
+  </div>
+  <div>
+    <label>Data de praça</label>
+    <input type="date" name="dt_praca" value="{{ militar.dt_praca if militar else '' }}">
+  </div>
+  <div>
+    <label>Data da última promoção</label>
+    <input type="date" name="dt_ult_promocao" value="{{ militar.dt_ult_promocao if militar else '' }}">
+  </div>
+  <div>
+    <label>Data de entrada na OM</label>
+    <input type="date" name="dt_om" value="{{ militar.dt_om if militar else '' }}">
+  </div>
+  <div>
+    <label>Data de entrada na sede</label>
+    <input type="date" name="dt_sede" value="{{ militar.dt_sede if militar else '' }}">
+  </div>
+  <div class="full">
+    <label>Observações</label>
+    <textarea name="observacoes" rows="3">{{ militar.observacoes if militar else '' }}</textarea>
+  </div>
+  <div class="full acoes-form">
+    <button class="btn" type="submit">Salvar</button>
+    <a class="btn btn-secundario" href="{{ url_for('pessoal.listar') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

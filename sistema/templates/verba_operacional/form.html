@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if registro else 'Novo' }} Registro{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>{{ 'Editar registro' if registro else 'Novo registro' }} de verba operacional</h1></div>
+
+<form method="POST" class="form-grid">
+  <div>
+    <label>Data de recebimento</label>
+    <input type="date" name="data_recebimento" required value="{{ registro.data_recebimento if registro else '' }}">
+  </div>
+  <div>
+    <label>Semestre de referência (ex: 1/2026)</label>
+    <input type="text" name="semestre_referencia" value="{{ registro.semestre_referencia if registro else '' }}">
+  </div>
+  <div>
+    <label>Valor (R$)</label>
+    <input type="text" name="valor" required value="{{ registro.valor if registro else '' }}">
+  </div>
+  <div>
+    <label>Origem</label>
+    <input type="text" name="origem" value="{{ registro.origem if registro else '' }}">
+  </div>
+  <div>
+    <label>Quem recebeu</label>
+    <input type="text" name="quem_recebeu" value="{{ registro.quem_recebeu if registro else '' }}">
+  </div>
+  <div>
+    <label>Tipo de verba</label>
+    <input type="text" name="tipo_verba" value="{{ registro.tipo_verba if registro else '' }}">
+  </div>
+  <div>
+    <label>Recibo/remessa</label>
+    <input type="text" name="recibo_remessa" value="{{ registro.recibo_remessa if registro else '' }}">
+  </div>
+  <div>
+    <label>Status</label>
+    <select name="status">
+      {% for opt in ["Recebida", "A prestar conta", "Prestada"] %}
+      <option value="{{ opt }}" {{ 'selected' if registro and registro.status == opt else '' }}>{{ opt }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="full">
+    <label>Observações</label>
+    <textarea name="observacoes" rows="3">{{ registro.observacoes if registro else '' }}</textarea>
+  </div>
+  <div class="full acoes-form">
+    <button class="btn" type="submit">Salvar</button>
+    <a class="btn btn-secundario" href="{{ url_for('verba_operacional.listar') }}">Cancelar</a>
+    {% if registro %}
+    <form method="POST" action="{{ url_for('verba_operacional.excluir', registro_id=registro.id) }}" onsubmit="return confirm('Excluir este registro?');">
+      <button class="btn btn-perigo" type="submit">Excluir</button>
+    </form>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

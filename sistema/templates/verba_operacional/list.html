@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Verba Operacional{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Verba Operacional</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('verba_operacional.novo') }}">+ Novo registro</a>{% endif %}
+</div>
+
+<div class="card" style="margin-bottom:16px; max-width:280px;">
+  <div class="valor" style="font-size:22px; font-weight:700; color:var(--verde-escuro);">R$ {{ "%.2f"|format(total) }}</div>
+  <div class="rotulo" style="font-size:13px; color:var(--texto-suave);">Total recebido (todos os registros)</div>
+</div>
+
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Data</th><th>Semestre</th><th>Valor</th><th>Origem</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td>{{ r.data_recebimento.strftime('%d/%m/%Y') if r.data_recebimento else "-" }}</td>
+        <td>{{ r.semestre_referencia or "-" }}</td>
+        <td>R$ {{ "%.2f"|format(r.valor) }}</td>
+        <td>{{ r.origem or "-" }}</td>
+        <td>
+          {% if r.status == "Prestada" %}<span class="badge badge-verde">{{ r.status }}</span>
+          {% elif r.status == "A prestar conta" %}<span class="badge badge-amarelo">{{ r.status }}</span>
+          {% else %}<span class="badge badge-cinza">{{ r.status or "-" }}</span>{% endif %}
+        </td>
+        <td>{% if current_user.is_admin %}<a class="btn btn-sm btn-secundario" href="{{ url_for('verba_operacional.editar', registro_id=r.id) }}">Editar</a>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="vazio">Nenhum registro cadastrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

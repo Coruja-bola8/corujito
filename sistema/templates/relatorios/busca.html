@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Busca por Nome/CPF{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>Relatório por Nome ou CPF</h1></div>
+<p><a href="{{ url_for('relatorios.index') }}">&larr; Voltar para relatórios</a></p>
+
+<form class="busca-form" method="GET">
+  <input type="text" name="q" placeholder="Digite o nome ou CPF..." value="{{ termo }}">
+  <button class="btn" type="submit">Buscar</button>
+</form>
+
+{% if termo %}
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Nome</th><th>CPF</th><th>Posto/Grad</th><th>Condecorações</th><th>Cursos</th><th></th></tr></thead>
+    <tbody>
+      {% for m in militares %}
+      <tr>
+        <td>{{ m.nome }}</td>
+        <td>{{ m.cpf or "-" }}</td>
+        <td>{{ m.posto_grad }}</td>
+        <td>{{ m.condecoracoes|length }}</td>
+        <td>{{ m.cursos|length }}</td>
+        <td><a class="btn btn-sm btn-secundario" href="{{ url_for('pessoal.ficha', militar_id=m.id) }}">Ver ficha completa</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="vazio">Nenhum militar encontrado para "{{ termo }}".</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

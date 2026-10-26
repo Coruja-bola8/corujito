@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block titulo %}Parceiros{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Parceiros e Colaboradores</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('parceiros.novo') }}">+ Novo parceiro</a>{% endif %}
+</div>
+
+<form class="busca-form" method="GET">
+  <input type="text" name="q" placeholder="Buscar por nome ou empresa..." value="{{ busca }}">
+  <button class="btn btn-secundario" type="submit">Buscar</button>
+</form>
+
+{% if current_user.is_admin %}
+<form id="form-massa" method="POST" action="{{ url_for('parceiros.excluir_em_massa') }}">
+  <input type="hidden" name="ids" id="ids-selecionados">
+  <div class="barra-selecao" id="barra-selecao">
+    <span class="contador" id="contador-selecao">0 selecionados</span>
+    <button type="button" class="btn-selecionar-todos-link" onclick="selecionarTodos()">Selecionar todos ({{ registros|length }})</button>
+    <button type="button" class="btn-selecionar-todos-link" onclick="limparSelecao()">Limpar seleção</button>
+    <button type="submit" class="btn btn-excluir-massa btn-sm" onclick="return confirmarExclusao()">Excluir selecionados</button>
+  </div>
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-cb"><input type="checkbox" class="cb-todos" id="cb-todos" onchange="toggleTodos(this)"></th>
+          <th>Nome</th><th>Empresa/Inst.</th><th>Telefone</th><th>Estágio CIE</th><th>Status</th><th>Última visita</th><th>Último encontro</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in registros %}
+        <tr>
+          <td class="col-cb"><input type="checkbox" class="cb-linha" value="{{ r.id }}" onchange="atualizarSelecao()"></td>
+          <td><a href="{{ url_for('parceiros.editar', parceiro_id=r.id) }}">{{ r.nome }}</a></td>
+          <td>{{ r.empresa_instituicao or "-" }}</td>
+          <td>{{ r.telefone or "-" }}</td>
+          <td>{{ r.estagio_cie or "-" }}</td>
+          <td>{{ r.status_participacao or "-" }}</td>
+          <td>{{ r.data_ultima_visita.strftime('%d/%m/%Y') if r.data_ultima_visita else "-" }}</td>
+          <td>{{ r.data_ultimo_encontro.strftime('%d/%m/%Y') if r.data_ultimo_encontro else "-" }}</td>
+          <td style="white-space:nowrap;">
+            <a class="btn btn-sm btn-secundario" href="{{ url_for('parceiros.editar', parceiro_id=r.id) }}">Editar</a>
+            {# CORREÇÃO: botão Excluir via JS para evitar form aninhado #}
+            <button type="button"
+                    class="btn btn-sm btn-perigo"
+                    onclick="excluirUm({{ r.id }}, '{{ r.nome|replace("'","\\'")|replace('"','\\"') }}')">
+              Excluir
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="vazio">Nenhum parceiro encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+{# Form oculto para exclusão individual #}
+<form id="form-excluir-um" method="POST" style="display:none;"></form>
+
+{% else %}
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Nome</th><th>Empresa/Inst.</th><th>Telefone</th><th>Status</th><th>Última visita</th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td>{{ r.nome }}</td><td>{{ r.empresa_instituicao or "-" }}</td>
+        <td>{{ r.telefone or "-" }}</td><td>{{ r.status_participacao or "-" }}</td>
+        <td>{{ r.data_ultima_visita.strftime('%d/%m/%Y') if r.data_ultima_visita else "-" }}</td>
+      </tr>
+      {% else %}<tr><td colspan="5" class="vazio">Nenhum parceiro.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<script>
+function excluirUm(id, nome) {
+  if (!confirm('Excluir o parceiro "' + nome + '"?\nEsta ação é irreversível.')) return;
+  const form = document.getElementById('form-excluir-um');
+  form.action = '/parceiros/' + id + '/excluir';
+  form.submit();
+}
+function getCbs() { return Array.from(document.querySelectorAll('.cb-linha')); }
+function atualizarSelecao() {
+  const sel = getCbs().filter(cb => cb.checked);
+  document.getElementById('ids-selecionados').value = sel.map(cb => cb.value).join(',');
+  document.getElementById('contador-selecao').textContent = sel.length + ' selecionado(s)';
+  const b = document.getElementById('barra-selecao');
+  sel.length > 0 ? b.classList.add('visivel') : b.classList.remove('visivel');
+  getCbs().forEach(cb => { cb.closest('tr').classList.toggle('selecionada', cb.checked); });
+  const ct = document.getElementById('cb-todos');
+  if (ct) {
+    ct.indeterminate = sel.length > 0 && sel.length < getCbs().length;
+    ct.checked = sel.length === getCbs().length && getCbs().length > 0;
+  }
+}
+function toggleTodos(cb) { getCbs().forEach(c => { c.checked = cb.checked; }); atualizarSelecao(); }
+function selecionarTodos() { getCbs().forEach(c => { c.checked = true; }); atualizarSelecao(); }
+function limparSelecao() {
+  getCbs().forEach(c => { c.checked = false; });
+  const ct = document.getElementById('cb-todos');
+  if (ct) { ct.checked = false; ct.indeterminate = false; }
+  atualizarSelecao();
+}
+function confirmarExclusao() {
+  const n = getCbs().filter(cb => cb.checked).length;
+  if (n === 0) { alert('Selecione ao menos um.'); return false; }
+  return confirm('Excluir ' + n + ' parceiro(s)?\nEsta ação é irreversível.');
+}
+</script>
+{% endblock %}

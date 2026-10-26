@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if registro else 'Nova' }} NC{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>{{ 'Editar NC' if registro else 'Nova NC' }}</h1></div>
+
+<form method="POST" class="form-grid">
+  <div>
+    <label>Fonte da verba</label>
+    <select name="fonte" required>
+      {% for f in fontes %}
+      <option value="{{ f }}" {{ 'selected' if registro and registro.fonte == f else '' }}>{{ f }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label>UG (Unidade Gestora)</label>
+    <input type="text" name="ug" value="{{ registro.ug if registro else '' }}">
+  </div>
+  <div>
+    <label>NC (Nota de Crédito / Empenho)</label>
+    <input type="text" name="nc" required value="{{ registro.nc if registro else '' }}">
+  </div>
+  <div>
+    <label>ND (Natureza de Despesa)</label>
+    <input type="text" name="nd" value="{{ registro.nd if registro else '' }}">
+  </div>
+  <div>
+    <label>Empresa</label>
+    <input type="text" name="empresa" value="{{ registro.empresa if registro else '' }}">
+  </div>
+  <div>
+    <label>Tipo de serviço/material</label>
+    <input type="text" name="tipo_servico_material" value="{{ registro.tipo_servico_material if registro else '' }}">
+  </div>
+  <div>
+    <label>Data</label>
+    <input type="date" name="data" value="{{ registro.data if registro else '' }}">
+  </div>
+  <div>
+    <label>Valor (R$)</label>
+    <input type="text" name="valor" value="{{ registro.valor if registro else '' }}">
+  </div>
+  <div>
+    <label>Prazo para empenhar</label>
+    <input type="date" name="prazo_empenho" value="{{ registro.prazo_empenho if registro else '' }}">
+  </div>
+  <div>
+    <label>Prazo para liquidar</label>
+    <input type="date" name="prazo_liquidacao" value="{{ registro.prazo_liquidacao if registro else '' }}">
+  </div>
+  <div>
+    <label>Empenhado em</label>
+    <input type="date" name="empenhado_em" value="{{ registro.empenhado_em if registro else '' }}">
+  </div>
+  <div>
+    <label>Liquidado em</label>
+    <input type="date" name="liquidado_em" value="{{ registro.liquidado_em if registro else '' }}">
+  </div>
+  <div>
+    <label>Status</label>
+    <select name="status">
+      {% for opt in ["Aguardando", "Empenhado", "Liquidado", "Atrasado"] %}
+      <option value="{{ opt }}" {{ 'selected' if registro and registro.status == opt else '' }}>{{ opt }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="full">
+    <label>Observações</label>
+    <textarea name="observacoes" rows="3">{{ registro.observacoes if registro else '' }}</textarea>
+  </div>
+  <div class="full acoes-form">
+    <button class="btn" type="submit">Salvar</button>
+    <a class="btn btn-secundario" href="{{ url_for('verba_adm.listar') }}">Cancelar</a>
+    {% if registro %}
+    <form method="POST" action="{{ url_for('verba_adm.excluir', registro_id=registro.id) }}" onsubmit="return confirm('Excluir esta NC?');">
+      <button class="btn btn-perigo" type="submit">Excluir</button>
+    </form>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

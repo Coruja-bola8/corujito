@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Verba Administrativa{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Verba Administrativa (NC)</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('verba_adm.novo') }}">+ Nova NC</a>{% endif %}
+</div>
+
+<div class="tabs">
+  <a href="{{ url_for('verba_adm.listar') }}" class="{{ 'ativo' if not fonte_filtro else '' }}">Todas</a>
+  {% for f in fontes %}
+  <a href="{{ url_for('verba_adm.listar', fonte=f) }}" class="{{ 'ativo' if fonte_filtro == f else '' }}">{{ f }}</a>
+  {% endfor %}
+</div>
+
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>NC</th><th>Fonte</th><th>Empresa</th><th>Tipo</th><th>Prazo empenho</th><th>Prazo liquidação</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      <tr>
+        <td>{{ r.nc }}</td>
+        <td>{{ r.fonte }}</td>
+        <td>{{ r.empresa or "-" }}</td>
+        <td>{{ r.tipo_servico_material or "-" }}</td>
+        <td>{{ r.prazo_empenho.strftime('%d/%m/%Y') if r.prazo_empenho else "-" }}</td>
+        <td>{{ r.prazo_liquidacao.strftime('%d/%m/%Y') if r.prazo_liquidacao else "-" }}</td>
+        <td>R$ {{ "%.2f"|format(r.valor) if r.valor else "0.00" }}</td>
+        <td>
+          {% if r.status == "Liquidado" %}<span class="badge badge-verde">{{ r.status }}</span>
+          {% elif r.status == "Atrasado" %}<span class="badge badge-vermelho">{{ r.status }}</span>
+          {% elif r.status == "Empenhado" %}<span class="badge badge-amarelo">{{ r.status }}</span>
+          {% else %}<span class="badge badge-cinza">{{ r.status or "-" }}</span>{% endif %}
+        </td>
+        <td>{% if current_user.is_admin %}<a class="btn btn-sm btn-secundario" href="{{ url_for('verba_adm.editar', registro_id=r.id) }}">Editar</a>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="vazio">Nenhuma NC cadastrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

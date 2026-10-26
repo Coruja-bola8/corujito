@@ -1,0 +1,217 @@
+:root {
+  --verde-escuro: #1f3d2b;
+  --verde: #2f5233;
+  --verde-claro: #4a7856;
+  --areia: #f4f1e8;
+  --areia-escura: #e8e2d0;
+  --texto: #24291f;
+  --texto-suave: #5c6355;
+  --borda: #d8d2bd;
+  --vermelho: #a4342a;
+  --amarelo: #b8860b;
+  --branco: #ffffff;
+  --sombra: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--areia);
+  color: var(--texto);
+  font-size: 15px;
+}
+
+a { color: var(--verde); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.layout { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  width: 230px;
+  background: var(--verde-escuro);
+  color: var(--areia);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar .brand {
+  padding: 20px 18px;
+  font-weight: 700;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  letter-spacing: 0.03em;
+}
+.sidebar .brand small { display: block; font-weight: 400; opacity: 0.7; font-size: 12px; margin-top: 4px; }
+.sidebar nav { flex: 1; padding: 10px 0; }
+.sidebar nav a {
+  display: block;
+  padding: 10px 18px;
+  color: var(--areia);
+  opacity: 0.85;
+  font-size: 14px;
+  border-left: 3px solid transparent;
+}
+.sidebar nav a:hover { background: rgba(255,255,255,0.06); text-decoration: none; opacity: 1; }
+.sidebar nav a.ativo { border-left-color: var(--amarelo); background: rgba(255,255,255,0.08); opacity: 1; }
+.sidebar .rodape-usuario {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  font-size: 13px;
+}
+.sidebar .rodape-usuario .papel { opacity: 0.65; }
+
+/* Main content */
+.conteudo { flex: 1; padding: 26px 32px; max-width: 1200px; }
+.topo-pagina { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.topo-pagina h1 { margin: 0; font-size: 22px; color: var(--verde-escuro); }
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: 1px solid var(--verde);
+  background: var(--verde);
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn:hover { background: var(--verde-claro); text-decoration: none; }
+.btn-secundario { background: transparent; color: var(--verde); }
+.btn-secundario:hover { background: var(--areia-escura); }
+.btn-perigo { background: var(--vermelho); border-color: var(--vermelho); }
+.btn-perigo:hover { background: #c2453a; }
+.btn-sm { padding: 4px 10px; font-size: 13px; }
+
+/* Cards */
+.card {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: var(--sombra);
+}
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.card-metrica .valor { font-size: 26px; font-weight: 700; color: var(--verde-escuro); }
+.card-metrica .rotulo { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+.card-metrica.alerta .valor { color: var(--vermelho); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; background: var(--branco); }
+table th, table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--borda); font-size: 14px; }
+table th { background: var(--areia-escura); color: var(--verde-escuro); font-weight: 600; }
+table tr:hover { background: #faf8f2; }
+.tabela-wrap { border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; }
+
+/* Forms */
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; max-width: 760px; }
+.form-grid .full { grid-column: 1 / -1; }
+label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--texto-suave); }
+input, select, textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--branco);
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--verde-claro); outline-offset: -1px; }
+.acoes-form { margin-top: 18px; display: flex; gap: 10px; }
+
+/* Badges */
+.badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge-verde { background: #dcecdf; color: var(--verde-escuro); }
+.badge-amarelo { background: #f6ecd2; color: var(--amarelo); }
+.badge-vermelho { background: #f4dcd9; color: var(--vermelho); }
+.badge-cinza { background: #e5e3da; color: var(--texto-suave); }
+
+/* Bars (mini charts sem dependências externas) */
+.barra-linha { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.barra-rotulo { width: 150px; font-size: 13px; flex-shrink: 0; }
+.barra-fundo { flex: 1; background: var(--areia-escura); border-radius: 4px; height: 16px; overflow: hidden; }
+.barra-preenchida { background: var(--verde); height: 100%; border-radius: 4px; }
+.barra-preenchida.claro { background: var(--vermelho); }
+.barra-valor { width: 70px; text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* Flash messages */
+.flash { padding: 10px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+.flash-sucesso { background: #dcecdf; color: var(--verde-escuro); border: 1px solid #b7d6bd; }
+.flash-erro { background: #f4dcd9; color: var(--vermelho); border: 1px solid #e3b3ac; }
+
+/* Login page */
+.login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--verde-escuro); }
+.login-card { background: var(--branco); padding: 34px 36px; border-radius: 10px; width: 320px; box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
+.login-card h1 { font-size: 18px; color: var(--verde-escuro); margin-top: 0; }
+.login-card .btn { width: 100%; margin-top: 6px; }
+
+.secao-titulo { font-size: 16px; color: var(--verde-escuro); margin: 26px 0 10px; }
+.texto-suave { color: var(--texto-suave); font-size: 13px; }
+.vazio { padding: 30px; text-align: center; color: var(--texto-suave); }
+.busca-form { display: flex; gap: 8px; margin-bottom: 16px; max-width: 420px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--borda); }
+.tabs a { padding: 8px 14px; font-size: 14px; border-bottom: 2px solid transparent; color: var(--texto-suave); }
+.tabs a.ativo { color: var(--verde-escuro); border-bottom-color: var(--verde); font-weight: 600; }
+
+/* ── Logout / Sessão ──────────────────────────────────────────── */
+.btn-logout {
+  display: block;
+  padding: 7px 12px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  color: var(--areia);
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-logout:hover { background: rgba(255,255,255,0.15); text-decoration: none; color: white; }
+
+/* ── Banner de aviso de sessão ────────────────────────────────── */
+#banner-sessao {
+  display: none;
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  background: var(--verde-escuro);
+  color: var(--areia);
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  max-width: 320px;
+  border-left: 4px solid var(--amarelo);
+}
+#banner-sessao strong { display: block; color: var(--amarelo); margin-bottom: 4px; }
+#banner-sessao .fechar-banner {
+  position: absolute; top: 6px; right: 10px;
+  background: none; border: none; color: var(--areia);
+  cursor: pointer; font-size: 16px;
+}
+
+/* ── Backup externo (modal) ───────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.aberto { display: flex; }
+.modal-box {
+  background: white;
+  border-radius: 10px;
+  padding: 28px 32px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+.modal-box h3 { margin: 0 0 12px; color: var(--verde-escuro); }
+.modal-box p { color: var(--texto-suave); font-size: 14px; margin-bottom: 16px; }
+.modal-acoes { display: flex; gap: 10px; justify-content: flex-end; }

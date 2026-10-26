@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Cursos{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Cursos</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('cursos.novo') }}">+ Novo curso</a>{% endif %}
+</div>
+
+<form class="busca-form" method="GET">
+  <input type="text" name="q" placeholder="Filtrar por nome do curso..." value="{{ busca }}">
+  <button class="btn btn-secundario" type="submit">Filtrar</button>
+</form>
+
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Militar</th><th>Curso</th><th>Instituição</th><th>Conclusão</th><th></th></tr></thead>
+    <tbody>
+      {% for c in registros %}
+      <tr>
+        <td><a href="{{ url_for('pessoal.ficha', militar_id=c.militar_id) }}">{{ c.militar.nome }}</a></td>
+        <td>{{ c.nome_curso }}</td>
+        <td>{{ c.instituicao or "-" }}</td>
+        <td>{{ c.data_conclusao.strftime('%d/%m/%Y') if c.data_conclusao else "-" }}</td>
+        <td>{% if current_user.is_admin %}<a class="btn btn-sm btn-secundario" href="{{ url_for('cursos.editar', registro_id=c.id) }}">Editar</a>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="vazio">Nenhum curso encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

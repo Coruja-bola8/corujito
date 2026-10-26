@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Pessoal{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina">
+  <h1>Pessoal</h1>
+  {% if current_user.is_admin %}<a class="btn" href="{{ url_for('pessoal.novo') }}">+ Novo militar</a>{% endif %}
+</div>
+
+<form class="busca-form" method="GET">
+  <input type="text" name="q" placeholder="Buscar por nome ou CPF..." value="{{ busca }}">
+  <button class="btn btn-secundario" type="submit">Buscar</button>
+</form>
+
+<div class="tabela-wrap">
+  <table>
+    <thead><tr><th>Nome</th><th>Posto/Grad</th><th>Situação</th><th>Tempo de sede</th><th></th></tr></thead>
+    <tbody>
+      {% for m in militares %}
+      <tr>
+        <td><a href="{{ url_for('pessoal.ficha', militar_id=m.id) }}">{{ m.nome }}</a></td>
+        <td>{{ m.posto_grad }}</td>
+        <td>{{ m.situacao or "-" }}</td>
+        <td>{{ m.intervalo_tempo_sede }}</td>
+        <td>
+          <a class="btn btn-sm btn-secundario" href="{{ url_for('pessoal.ficha', militar_id=m.id) }}">Ficha</a>
+          {% if current_user.is_admin %}
+          <a class="btn btn-sm btn-secundario" href="{{ url_for('pessoal.editar', militar_id=m.id) }}">Editar</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="vazio">Nenhum militar encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

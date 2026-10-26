@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}Participante{% endblock %}
+{% block conteudo %}
+<div class="topo-pagina"><h1>{{ 'Editar' if participante else 'Novo' }} participante — {{ turma.estagio_turno }}</h1></div>
+
+<form method="POST" class="form-grid">
+  <div>
+    <label>Nome do voluntário</label>
+    <input type="text" name="nome_voluntario" required value="{{ participante.nome_voluntario if participante else '' }}">
+  </div>
+  <div>
+    <label>Empresa</label>
+    <input type="text" name="empresa" value="{{ participante.empresa if participante else '' }}">
+  </div>
+  <div>
+    <label>Indicado por</label>
+    <input type="text" name="indicado_por" value="{{ participante.indicado_por if participante else '' }}">
+  </div>
+  <div>
+    <label>Encaminhamento</label>
+    <input type="text" name="encaminhamento" value="{{ participante.encaminhamento if participante else '' }}">
+  </div>
+  <div>
+    <label>Doc. de remessa do pedido</label>
+    <input type="text" name="doc_remessa_pedido" value="{{ participante.doc_remessa_pedido if participante else '' }}">
+  </div>
+  <div>
+    <label>Status de participação</label>
+    <select name="status_participacao">
+      {% for opt in ["Indicado", "Efetivamente fez", "Faltou", "Não fez"] %}
+      <option value="{{ opt }}" {{ 'selected' if participante and participante.status_participacao == opt else '' }}>{{ opt }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="full acoes-form">
+    <button class="btn" type="submit">Salvar</button>
+    <a class="btn btn-secundario" href="{{ url_for('estagios.listar_participantes', turma_id=turma.id) }}">Cancelar</a>
+    {% if participante %}
+    <form method="POST" action="{{ url_for('estagios.excluir_participante', participante_id=participante.id) }}" onsubmit="return confirm('Excluir este participante?');">
+      <button class="btn btn-perigo" type="submit">Excluir</button>
+    </form>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

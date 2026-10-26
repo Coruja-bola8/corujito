@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}Página não encontrada{% endblock %}
+{% block conteudo %}
+<div style="text-align:center; padding: 60px 20px;">
+  <div style="font-size:48px; color:var(--borda);">🔍</div>
+  <h2 style="color:var(--verde-escuro); margin-top:16px;">Página não encontrada</h2>
+  <p style="color:var(--texto-suave);">O endereço acessado não existe ou foi removido.</p>
+  <a class="btn btn-secundario" href="{{ url_for('dashboard.index') }}">Voltar ao dashboard</a>
+</div>
+{% endblock %}
