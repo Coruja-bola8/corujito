@@ -3,6 +3,24 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Ambiente virtual
+.venv/
+venv/
+ENV/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDEs
+.vscode/
+.idea/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
 # C extensions
 *.so
 
